@@ -1,0 +1,7 @@
+name=Snake
+author=Playdate Pipeline
+description=Classic snake game with unique crank-based turning
+bundleID=com.playdatepipeline.snake
+version=1.0.0
+buildNumber=1
+imagePath=launcher/card

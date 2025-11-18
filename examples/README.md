@@ -32,6 +32,35 @@ Classic brick-breaking game with crank-controlled paddle.
 
 ---
 
+### 🐍 [Snake](snake/)
+
+Classic snake game with unique crank-based turning mechanic.
+
+**Features:**
+- Innovative crank turning (rotate to turn snake)
+- Grid-based movement with smooth animations
+- Progressive difficulty (speed increases)
+- Classic eat-and-grow gameplay
+- Clean retro grid aesthetic
+- High score persistence
+
+**Demonstrates:**
+- Grid-based game design
+- Unique crank control scheme
+- Animation interpolation
+- Timer-based movement
+- Direction management
+- Array manipulation
+- Collision detection in grids
+
+**Difficulty:** Easy
+**Lines of Code:** ~520
+**Estimated Dev Time:** 3-4 hours
+
+[View Snake README →](snake/README.md)
+
+---
+
 ## Building Examples
 
 ### Using Make
@@ -79,18 +108,22 @@ git push origin v1.0.0
 ## Learning Path
 
 ### Beginner
-Start with understanding:
+Start with **Snake** - easier implementation, core concepts:
 1. Basic Playdate API structure
 2. Game loop (playdate.update)
-3. Input handling (buttons, crank)
-4. Drawing functions
+3. Grid-based movement
+4. Crank input handling
+5. Timer-based updates
+6. Simple collision detection
 
 ### Intermediate
-Study these examples to learn:
-1. **Breakout** - Physics, collisions, state management
-2. Game state patterns
-3. Visual effects and polish
-4. Data persistence
+Move to **Breakout** for advanced topics:
+1. Physics and vector math
+2. AABB collision detection
+3. Particle systems
+4. Visual effects (screen shake)
+5. Game state patterns
+6. Data persistence
 
 ### Advanced
 Extend the examples with:
@@ -123,14 +156,18 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 ## Roadmap
 
-Planned future examples:
-- [ ] **Snake** - Simple game with crank turn controls
+**Completed:**
+- [x] **Breakout** - Physics-based brick breaker
+- [x] **Snake** - Grid-based crank turning
+
+**Planned future examples:**
 - [ ] **Pong** - Two-player with crank paddles
 - [ ] **Space Invaders** - Wave-based shooter
 - [ ] **Tetris** - Block-falling puzzle with crank rotation
 - [ ] **Fishing** - Creative crank usage as reel
 - [ ] **Platformer** - Side-scrolling action
 - [ ] **Puzzle** - Grid-based logic game
+- [ ] **RPG Battle** - Turn-based combat demo
 
 ## Resources
 

@@ -687,11 +687,31 @@ make run
 
 [View Breakout Documentation →](examples/breakout/README.md)
 
+### 🐍 Snake
+
+Classic snake game with unique crank-based turning.
+
+**Play it to learn:**
+- Grid-based game design
+- Innovative crank turning mechanic (rotate to turn)
+- Smooth animation interpolation
+- Timer-based game loops
+- Direction management
+- Array-based game objects
+
+**Try it:**
+```bash
+make build GAME_SOURCE=examples/snake
+make run
+```
+
+[View Snake Documentation →](examples/snake/README.md)
+
 **More examples coming soon:**
-- Snake with crank turn controls
 - Pong with two-player crank paddles
 - Space Invaders wave shooter
 - Tetris with crank piece rotation
+- Fishing with crank-as-reel mechanic
 
 See [examples/README.md](examples/README.md) for details.
 
