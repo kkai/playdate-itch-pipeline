@@ -1,0 +1,7 @@
+name=Breakout
+author=Playdate Pipeline
+description=Classic brick-breaking game with crank-controlled paddle
+bundleID=com.playdatepipeline.breakout
+version=1.0.0
+buildNumber=1
+imagePath=launcher/card

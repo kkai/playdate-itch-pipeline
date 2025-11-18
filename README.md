@@ -12,6 +12,7 @@ This repository provides a **complete, professional-grade automated pipeline** f
 ### What's Included
 
 - ✅ **Game Template**: Ready-to-use Playdate game structure with asset directories
+- ✅ **Example Games**: Complete Breakout implementation (more coming soon!)
 - ✅ **Build Scripts**: Automated compilation for Playdate Simulator and Device
 - ✅ **CI/CD Pipeline**: Multi-platform GitHub Actions workflow (Linux, macOS, Windows)
 - ✅ **Multi-Channel Deployment**: Dev, Beta, and Stable release channels
@@ -26,8 +27,9 @@ This repository provides a **complete, professional-grade automated pipeline** f
 
 ### 🎯 Quick Start Templates
 - Pre-configured game template with proper directory structure
-- Example games with sprites, sounds, and crank input
-- Lua and C API support
+- **Complete example games**: Breakout (crank-controlled paddle, particles, screen shake)
+- Asset directories with documentation (images, sounds, fonts)
+- Lua API examples and best practices
 
 ### 🔨 Build Automation
 - Compile for Playdate Simulator (Mac, Windows, Linux)
@@ -660,6 +662,40 @@ games/
 # Production build (optimized)
 ./scripts/build.sh --env production
 ```
+
+## Example Games
+
+The pipeline includes complete, production-ready example games:
+
+### 🧱 Breakout
+
+Classic brick-breaking game with crank-controlled paddle.
+
+**Play it to learn:**
+- Crank input handling (smooth analog control)
+- Physics and collision detection
+- Particle systems for visual effects
+- Screen shake for impact feedback
+- Game state management (menu, playing, game over)
+- High score persistence with datastore
+
+**Try it:**
+```bash
+make build GAME_SOURCE=examples/breakout
+make run
+```
+
+[View Breakout Documentation →](examples/breakout/README.md)
+
+**More examples coming soon:**
+- Snake with crank turn controls
+- Pong with two-player crank paddles
+- Space Invaders wave shooter
+- Tetris with crank piece rotation
+
+See [examples/README.md](examples/README.md) for details.
+
+---
 
 ## Resources
 
