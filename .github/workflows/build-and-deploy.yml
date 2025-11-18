@@ -6,6 +6,7 @@ on:
       - main
     tags:
       - 'v*.*.*'
+      - 'v*.*.*-beta.*'
   pull_request:
     branches:
       - main
@@ -137,11 +138,77 @@ jobs:
 
           ./butler push "$PDX_FILE" "$ITCH_GAME:playdate-dev" --userversion "$VERSION"
 
+  deploy-beta:
+    name: Deploy to itch.io (Beta Channel)
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-beta.')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+          ./butler -V
+
+      - name: Login to butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler login
+
+      - name: Deploy to itch.io (beta channel)
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+        run: |
+          # Get version from tag
+          VERSION="${GITHUB_REF#refs/tags/}"
+
+          # Find and deploy simulator build
+          PDX_FILE=$(find artifacts/playdate-game-simulator-ubuntu-latest -name "*.pdx" -not -name "*-device.pdx" | head -n 1)
+
+          echo "Deploying $PDX_FILE to $ITCH_GAME:playdate-beta"
+          echo "Version: $VERSION"
+
+          ./butler push "$PDX_FILE" "$ITCH_GAME:playdate-beta" --userversion "$VERSION"
+
+      - name: Create Pre-Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*.pdx
+          body: |
+            # Beta Release ${{ github.ref_name }}
+
+            This is a beta release for testing purposes.
+
+            **⚠️ Warning**: Beta releases may contain bugs and incomplete features.
+
+            ## Installation
+            - Download the appropriate .pdx file for your platform
+            - Test in Playdate Simulator or on device
+            - Report issues on GitHub
+
+            ## Feedback
+            Please report any issues or feedback on our GitHub Issues page.
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   deploy-stable:
     name: Deploy to itch.io (Stable Channel) and Create Release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-beta.')
 
     steps:
       - name: Checkout code
