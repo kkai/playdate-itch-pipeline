@@ -1,0 +1,281 @@
+name: Build and Deploy to itch.io
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PLAYDATE_SDK_VERSION: "2.4.1"
+  GAME_NAME: "MyPlaydateGame"
+
+jobs:
+  build:
+    name: Build Playdate Game
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Playdate SDK
+        id: cache-sdk
+        uses: actions/cache@v3
+        with:
+          path: ~/PlaydateSDK
+          key: playdate-sdk-${{ runner.os }}-${{ env.PLAYDATE_SDK_VERSION }}
+
+      - name: Download Playdate SDK (Linux)
+        if: runner.os == 'Linux' && steps.cache-sdk.outputs.cache-hit != 'true'
+        run: |
+          wget https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.tar.gz
+          tar -xzf PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.tar.gz -C ~/
+          rm PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.tar.gz
+
+      - name: Download Playdate SDK (macOS)
+        if: runner.os == 'macOS' && steps.cache-sdk.outputs.cache-hit != 'true'
+        run: |
+          wget https://download.panic.com/playdate_sdk/macOS/PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.zip
+          unzip -q PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.zip -d ~/
+          rm PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.zip
+
+      - name: Download Playdate SDK (Windows)
+        if: runner.os == 'Windows' && steps.cache-sdk.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://download.panic.com/playdate_sdk/Windows/PlaydateSDK-${{ env.PLAYDATE_SDK_VERSION }}.zip" -OutFile PlaydateSDK.zip
+          Expand-Archive -Path PlaydateSDK.zip -DestinationPath ~\
+          Remove-Item PlaydateSDK.zip
+
+      - name: Set SDK Path (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: echo "PLAYDATE_SDK_PATH=$HOME/PlaydateSDK" >> $GITHUB_ENV
+
+      - name: Set SDK Path (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: echo "PLAYDATE_SDK_PATH=$env:USERPROFILE\PlaydateSDK" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Verify SDK Installation
+        shell: bash
+        run: |
+          echo "SDK Path: $PLAYDATE_SDK_PATH"
+          ls -la "$PLAYDATE_SDK_PATH/bin" || dir "$PLAYDATE_SDK_PATH/bin"
+
+      - name: Build Game for Simulator
+        shell: bash
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh --source game-template
+
+      - name: Build Game for Device
+        shell: bash
+        run: |
+          ./scripts/build.sh --source game-template --device
+
+      - name: Upload Simulator Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: playdate-game-simulator-${{ matrix.os }}
+          path: build/*.pdx
+          if-no-files-found: error
+
+      - name: Upload Device Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: playdate-game-device-${{ matrix.os }}
+          path: build/*-device.pdx
+          if-no-files-found: error
+
+  deploy-dev:
+    name: Deploy to itch.io (Dev Channel)
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: playdate-game-simulator-ubuntu-latest
+          path: build
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+          ./butler -V
+
+      - name: Login to butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler login
+
+      - name: Deploy to itch.io (dev channel)
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+        run: |
+          # Find the .pdx file
+          PDX_FILE=$(find build -name "*.pdx" -not -name "*-device.pdx" | head -n 1)
+          VERSION="${GITHUB_SHA:0:7}"
+
+          echo "Deploying $PDX_FILE to $ITCH_GAME:playdate-dev"
+
+          ./butler push "$PDX_FILE" "$ITCH_GAME:playdate-dev" --userversion "$VERSION"
+
+  deploy-stable:
+    name: Deploy to itch.io (Stable Channel) and Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+          ./butler -V
+
+      - name: Login to butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler login
+
+      - name: Deploy to itch.io (stable channel)
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+        run: |
+          # Get version from tag
+          VERSION="${GITHUB_REF#refs/tags/}"
+
+          # Find and deploy simulator build
+          PDX_FILE=$(find artifacts/playdate-game-simulator-ubuntu-latest -name "*.pdx" -not -name "*-device.pdx" | head -n 1)
+
+          echo "Deploying $PDX_FILE to $ITCH_GAME:playdate-stable"
+          echo "Version: $VERSION"
+
+          ./butler push "$PDX_FILE" "$ITCH_GAME:playdate-stable" --userversion "$VERSION"
+
+      - name: Prepare Release Assets
+        run: |
+          mkdir release
+          # Copy all builds
+          find artifacts -name "*.pdx" -exec cp -r {} release/ \;
+
+          # Create zip files
+          cd release
+          for pdx in *.pdx; do
+            zip -r "${pdx}.zip" "$pdx"
+            rm -rf "$pdx"
+          done
+          cd ..
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Generate release notes
+          cat > RELEASE_NOTES.md << EOF
+          # $VERSION
+
+          ## What's New
+
+          <!-- Add your release notes here -->
+
+          ## Downloads
+
+          - **Simulator Build**: For testing in Playdate Simulator
+          - **Device Build**: For installing on your Playdate device
+
+          ## Installation
+
+          ### Simulator
+          1. Download the simulator build (.pdx.zip)
+          2. Extract the .pdx file
+          3. Open in Playdate Simulator
+
+          ### Device
+          1. Download the device build (.pdx.zip)
+          2. Extract the .pdx file
+          3. Copy to your Playdate via USB or use pdutil
+
+          ## itch.io
+
+          This release is also available on itch.io: https://${{ secrets.ITCH_GAME }}
+
+          ---
+
+          Built with ❤️ for Playdate
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Lua Linter
+        run: |
+          # Install luacheck
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          sudo luarocks install luacheck
+
+          # Run linter
+          find game-template/Source -name "*.lua" -exec luacheck {} \; || true
+
+      - name: Check pdxinfo
+        run: |
+          if [ ! -f game-template/Source/pdxinfo ]; then
+            echo "Error: pdxinfo file not found"
+            exit 1
+          fi
+
+          # Validate required fields
+          for field in name author description bundleID version; do
+            if ! grep -q "^$field=" game-template/Source/pdxinfo; then
+              echo "Error: Missing required field: $field"
+              exit 1
+            fi
+          done
+
+          echo "pdxinfo validation passed"

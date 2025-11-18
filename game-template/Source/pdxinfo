@@ -1,0 +1,8 @@
+name=My Playdate Game
+author=Your Name
+description=An awesome game for Playdate!
+bundleID=com.yourname.mygame
+version=1.0.0
+buildNumber=1
+imagePath=launcher/card
+launchSoundPath=launcher/sound
