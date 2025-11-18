@@ -15,7 +15,6 @@ import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
-import "CoreLibs/crank"
 
 -- Shortcuts for commonly used modules
 local gfx <const> = playdate.graphics
@@ -31,17 +30,14 @@ local score = 0
 local gameStarted = false
 local showFPS = true
 
--- Fonts
-local gameFont = nil
-
 --[[
     Initialize the game
     Called once when the game starts
 ]]
 function init()
-    -- Set up fonts
-    gameFont = gfx.font.new('fonts/Asheville-Sans-14-Bold')
-    gfx.setFont(gameFont)
+    -- Use system font (or load custom font from fonts/ directory)
+    -- local customFont = gfx.font.new('fonts/your-font-name')
+    -- gfx.setFont(customFont)
 
     -- Create player
     player = {
@@ -176,28 +172,35 @@ function playdate.update()
 end
 
 --[[
-    Called when the game is about to be suspended
-    (Playdate lock button pressed)
+    Called when device is about to lock (sleep button pressed)
 ]]
-function playdate.gameWillPause()
+function playdate.deviceWillLock()
     -- Save game state here
-    print("Game pausing...")
+    print("Device locking...")
 end
 
 --[[
-    Called when the game is resumed
+    Called when device unlocks
 ]]
-function playdate.gameWillResume()
+function playdate.deviceDidUnlock()
     -- Restore game state here
-    print("Game resuming...")
+    print("Device unlocked...")
 end
 
 --[[
     Called when the game is about to terminate
+    (Player exits via System Menu)
 ]]
 function playdate.gameWillTerminate()
     -- Final save here
     print("Game terminating...")
+end
+
+--[[
+    Called when device will sleep (low battery)
+]]
+function playdate.deviceWillSleep()
+    print("Device sleeping...")
 end
 
 -- Initialize the game
