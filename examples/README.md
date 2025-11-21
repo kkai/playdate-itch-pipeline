@@ -61,6 +61,34 @@ Classic snake game with unique crank-based turning mechanic.
 
 ---
 
+### 🏓 [Pong](pong/)
+
+Classic table tennis with AI opponent and two-player mode.
+
+**Features:**
+- Single player vs adaptive AI
+- Two-player local multiplayer
+- Crank-controlled paddle (Player 1)
+- Ball angle reflection physics
+- Progressive AI difficulty
+- Classic court design
+
+**Demonstrates:**
+- AI opponent with ball prediction
+- Multiplayer game structure
+- Adaptive difficulty
+- Ball physics and angles
+- Menu system with mode selection
+- Crank analog control
+
+**Difficulty:** Easy
+**Lines of Code:** ~520
+**Estimated Dev Time:** 3-4 hours
+
+[View Pong README →](pong/README.md)
+
+---
+
 ## Building Examples
 
 ### Using Make
@@ -159,9 +187,9 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 **Completed:**
 - [x] **Breakout** - Physics-based brick breaker
 - [x] **Snake** - Grid-based crank turning
+- [x] **Pong** - Two-player with AI opponent
 
 **Planned future examples:**
-- [ ] **Pong** - Two-player with crank paddles
 - [ ] **Space Invaders** - Wave-based shooter
 - [ ] **Tetris** - Block-falling puzzle with crank rotation
 - [ ] **Fishing** - Creative crank usage as reel

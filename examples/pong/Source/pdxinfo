@@ -1,0 +1,7 @@
+name=Pong
+author=Playdate Pipeline
+description=Classic Pong with crank-controlled paddles and AI opponent
+bundleID=com.playdatepipeline.pong
+version=1.0.0
+buildNumber=1
+imagePath=launcher/card
