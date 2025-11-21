@@ -1,0 +1,10 @@
+name=Space Invaders
+author=Playdate Developer
+description=Classic wave-based shooter with crank controls
+bundleID=com.example.spaceinvaders
+version=1.0.0
+buildNumber=1
+imagePath=
+launchSoundPath=
+contentWarning=
+contentWarning2=

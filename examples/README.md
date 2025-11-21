@@ -89,6 +89,35 @@ Classic table tennis with AI opponent and two-player mode.
 
 ---
 
+### 👾 [Space Invaders](space-invaders/)
+
+Classic arcade wave-based shooter with destructible shields.
+
+**Features:**
+- Crank-controlled ship movement
+- Three alien types with different point values
+- Pixel-based destructible shields
+- Mystery UFO bonus ship
+- Wave progression with increasing difficulty
+- High score persistence
+
+**Demonstrates:**
+- Wave-based game design
+- Pixel-perfect shield destruction
+- Column-based AI shooting
+- Adaptive difficulty scaling
+- Animated alien sprites
+- Multiple entity management
+- Particle explosions
+
+**Difficulty:** Medium
+**Lines of Code:** ~700
+**Estimated Dev Time:** 4-6 hours
+
+[View Space Invaders README →](space-invaders/README.md)
+
+---
+
 ## Building Examples
 
 ### Using Make
@@ -188,9 +217,9 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 - [x] **Breakout** - Physics-based brick breaker
 - [x] **Snake** - Grid-based crank turning
 - [x] **Pong** - Two-player with AI opponent
+- [x] **Space Invaders** - Wave-based shooter
 
 **Planned future examples:**
-- [ ] **Space Invaders** - Wave-based shooter
 - [ ] **Tetris** - Block-falling puzzle with crank rotation
 - [ ] **Fishing** - Creative crank usage as reel
 - [ ] **Platformer** - Side-scrolling action
